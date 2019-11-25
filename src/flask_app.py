@@ -2,9 +2,11 @@ import PyPDF2
 from flask import Flask, request, jsonify
 from flasgger import Swagger
 import PyPDF2 
-# from rake_nltk import Rake
 import os
 import RAKE
+import textract
+import docx2txt
+
 
 
 app = Flask(__name__)
@@ -19,9 +21,9 @@ def lading_page():
 
 	return "Go to https://kewpyp.herokuapp.com/apidocs"
 
-@app.route('/predict_file', methods=["POST"])
-def read_file():
-	"""Input
+@app.route('/predict_pdf_file', methods=["POST"])
+def read_file_pdf():
+	"""pdf files
 	---
 	parameters:
 	  - name: input_file
@@ -41,6 +43,29 @@ def read_file():
 	# r.extract_keywords_from_text(text)
 	# print(r.get_ranked_phrases_with_scores())
 	
+	stop_dir = "stopwordlist.txt"
+	rake = RAKE.Rake(stop_dir) #takes stopwords as list of strings
+
+	output = rake.run(text, minCharacters = 3, maxWords = 3, minFrequency = 1)
+	return str(output)
+
+@app.route('/predict_doc_file', methods=["POST"])
+def read_file_doc():
+	""".doc/.docx files
+	---
+	parameters:
+	  - name: input_file
+	    in: formData
+	    type: file
+	    required: true
+	responses:
+	    200:
+	    	description: Output
+	"""
+	# text = textract.process(request.files.get("input_file"))
+
+	text = docx2txt.process(request.files.get("input_file"))	
+
 	stop_dir = "stopwordlist.txt"
 	rake = RAKE.Rake(stop_dir) #takes stopwords as list of strings
 
